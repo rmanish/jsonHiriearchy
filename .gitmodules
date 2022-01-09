@@ -1,0 +1,8 @@
+[submodule "internal"]
+	path = internal
+	url = ./../../common-submodules/internal-bp.git
+	branch = master
+[submodule "schema"]
+	path = schema
+	url = ./../../common-submodules/validation-schemas.git
+	branch = master

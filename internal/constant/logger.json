@@ -1,0 +1,8 @@
+{
+  "stage": "dev",
+  "stack": "my-stack",
+  "app": "my-app",
+  "streamName": "log-stream",
+  "verbose": false,
+  "region": "ap-south-1"
+}

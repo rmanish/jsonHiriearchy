@@ -1,0 +1,19 @@
+{
+    "verbose": true,
+    "rootDir": "./../../businessLogic",
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "../coverage",
+    "transform": {
+      "^.+\\.js$": "../node_modules/babel-jest"
+    },
+    "moduleNameMapper": {
+      "@helpers(.*)": "<rootDir>/../internal/helpers$1",
+      "@appconstants(.*)": "<rootDir>/../internal/constant$1",
+      "@models(.*)": "<rootDir>/../models$1",
+      "@schema(.*)": "<rootDir>/../schema$1",
+      "@app(.*)": "<rootDir>/../internal/app.js",
+      "@appConfig(.*)": "<rootDir>/../serviceSetup.js"
+    }
+  }
+  

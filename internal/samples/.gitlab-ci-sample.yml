@@ -1,0 +1,186 @@
+image: node:10.15.3
+stages:
+- check_code_quality
+- deploy_dev
+- deploy_dev_stop
+- deploy_qa
+- deploy_qa_stop
+- deploy_production
+
+variables:
+  GIT_STRATEGY: clone
+
+fetch node modules lint and test:
+  stage: check_code_quality
+  only: 
+    - merge_requests
+    - develop
+    - master
+    - tags
+  tags:
+    - dev
+  allow_failure: false
+  script:
+    - npm run init
+    - sh ./internal/scripts/fetch-lint-test.sh
+
+deploy PRs to dev:
+  stage: deploy_dev
+  tags:
+    - dev
+  when: manual
+  only: 
+    - merge_requests
+  except:
+    - develop
+    - master
+    - tags
+  allow_failure: true
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-dev-pr.sh
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    url: https://${DEV_API_URL}/${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}/
+    on_stop: dev_stop_review_app_for_pr
+
+dev_stop_review_app_for_pr:
+  stage: deploy_dev_stop
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  allow_failure: true
+  only: 
+    - merge_requests  
+  tags:
+    - dev
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-stop-dev-pr.sh
+
+######### Develop Deployment
+
+deploy develop Branch:
+  stage: deploy_dev
+  tags:
+    - dev
+  only: 
+    - develop
+  allow_failure: false
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-dev.sh
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    url: https://${DEV_API_URL}/${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}/
+
+######### Master Deployment
+
+deploy master Branch:
+  stage: deploy_dev
+  tags:
+    - dev
+  only: 
+    - master
+  allow_failure: false
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-master.sh
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    url: https://${DEV_API_URL}/${CI_PROJECT_NAME}/
+
+deploy master Branch on QA:
+  stage: deploy_qa
+  tags:
+    - qa
+  only: 
+    - master
+  allow_failure: false
+  when: manual
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-qa-master.sh
+  environment:
+    name: qa/$CI_COMMIT_REF_NAME
+    url: https://${QA_API_URL}/${CI_PROJECT_NAME}/
+
+###### Deploy Tag on dev
+deploy tag on dev:
+  stage: deploy_dev
+  tags:
+    - dev
+  only: 
+    - tags
+  allow_failure: false
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-dev.sh
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    url: https://${DEV_API_URL}/${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}/
+    on_stop: stop_dev_review_app
+
+stop_dev_review_app:
+  stage: deploy_dev
+  environment:
+    name: dev/$CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  allow_failure: true
+  only: 
+    - tags  
+  tags:
+    - dev
+  script:
+    - npm run init
+    - sh ./internal/scripts/deploy-stop-dev-pr.sh
+
+deploy tag on qa:
+  stage: deploy_qa
+  tags:
+    - qa
+  only: 
+    - tags
+  allow_failure: false
+  when: manual
+  script:
+    - npm run init -- qa
+    - sh ./internal/scripts/deploy-qa.sh
+  environment:
+    name: qa/$CI_COMMIT_REF_NAME
+    url: https://${QA_API_URL}/${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}/
+    on_stop: stop_qa_review_app
+
+stop_qa_review_app:
+  stage: deploy_qa
+  environment:
+    name: qa/$CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  allow_failure: true
+  only: 
+    - tags  
+  tags:
+    - qa
+  script:
+    - npm run init -- qa
+    - sh ./internal/scripts/deploy-stop-qa.sh
+
+deploy tag on production:
+  stage: deploy_production
+  tags:
+    - prod
+  only: 
+    - tags
+  when: manual
+  allow_failure: false
+  script:
+    - npm run init -- prod
+    - sh ./internal/scripts/deploy-production.sh
+  environment:
+    name: prod/$CI_COMMIT_REF_NAME
+    url: https://${PROD_API_URL}/${CI_PROJECT_NAME}/
+
+    # Stop Production: Contact Gitlab/Cluster Admin to delete the production release

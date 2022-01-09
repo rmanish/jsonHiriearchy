@@ -1,0 +1,18 @@
+# package directories
+node_modules
+
+# Serverless directories
+.serverless
+.vscode
+.DS_Store
+
+# Build directories
+build
+
+# Coverage directories
+coverage
+
+# Exclude Files
+swagger.json
+serverless.yml
+.env
