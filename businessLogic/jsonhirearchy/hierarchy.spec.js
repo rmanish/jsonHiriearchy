@@ -27,4 +27,10 @@ describe('Hierarchy Module', () => {
          resp.data).toBeTruthy();
   });
 
+    it('Calling github repo api', async () => {
+      const resp = await hierarchyClass.getGitRepo({"q":"repo","page":10,"perPage":10});
+      expect(resp && resCode.FOUND && statusCode.OK &&
+           resp.data).toBeTruthy();
+    });
+
 });
