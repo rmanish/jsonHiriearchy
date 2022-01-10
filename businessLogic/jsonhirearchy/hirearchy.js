@@ -4,6 +4,7 @@ import response from '@helpers/responseHelper';
 import resCode from '@appconstants/responseCode.json';
 import statusCode from '@appconstants/statusCode.json';
 import {input} from '../dummy/input';
+import axios from "axios";
 
 export default class hirearchy {
 
@@ -54,6 +55,28 @@ async convertToHiriearchy (array){
       return boom.serverUnavailable(resCode.DB_ERROR, err);
     }
   }
+
+  async getGitRepo(obj){
+    try {
+        let result = await this.gitcall(obj.q,obj.page,obj.perPage);
+        return response.successHandler(statusCode.OK, resCode.OK, result.data);
+    } catch (err) {
+      return boom.serverUnavailable(resCode.DB_ERROR, err);
+    }
+
+  }
+  async gitcall(q,page,perPage){
+    let hitUrl= `https://api.github.com/search/repositories?q=${q}&order=desc&page=${page}&per_page=${perPage}`
+    console.log(hitUrl);
+    let resp = await axios({
+        url: hitUrl,
+        method: 'get',
+        headers:''
+        });
+    return resp;    
+
+  }
+  
  
 }
 

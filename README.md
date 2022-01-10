@@ -32,6 +32,7 @@ Blue Print is build up on
 
 10. Run `npm start` on your terminal to run the app.
 11. App will be up on http://localhost:3000/.
+12. To create swagger file run  npm run generate
  
 
 ### Running the tests
